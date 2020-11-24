@@ -50,4 +50,33 @@ library(easypackages)
 libraries(pckg)
 ```
 
-## Cargar el Modelo preentrenado 
+## **Cargar el Modelo preentrenado**
+```{r}
+# Descargar el modelo preentrenado 
+# udpipe::udpipe_download_model('spanish') descomentar en caso de no tenerlo descargado
+
+# Carga de modelo pre-entrenado
+model <-  udpipe_load_model(file = "spanish-gsd-ud-2.5-191206.udpipe")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
