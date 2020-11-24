@@ -8,8 +8,8 @@ output:
     css: style.css
     toc: true
     number_sections: true
-    toc_depth: 3
-    toc_float:
+    toc_depth: 2
+    toc_float: 
       collapsed: true
       smooth_scroll: false
 ---
@@ -50,33 +50,29 @@ library(easypackages)
 libraries(pckg)
 ```
 
+
 ## **Cargar el Modelo preentrenado**
-```{r}
+
+
+```{r message=FALSE, warning=TRUE,comment=F}
 # Descargar el modelo preentrenado 
 # udpipe::udpipe_download_model('spanish') descomentar en caso de no tenerlo descargado
 
 # Carga de modelo pre-entrenado
 model <-  udpipe_load_model(file = "spanish-gsd-ud-2.5-191206.udpipe")
-
 ```
 
+# **Análisis**
+## **Análisis morfológico**
 
+```{r}
+# Texto para el análisis
 
+text <- "El INEC proporciona información anual sobre el sector agropecuario, a través de la aplicación de la Encuesta de Superficie y Producción Agropecuaria Continua (ESPAC), la cual obtiene datos relacionados a la cantidad de superficie plantada y cosechada, la producción y las ventas de productos agrícolas."
 
+# Analisis morfológico
+text_annotated <-  udpipe_annotate(model, x = stri_enc_toutf8(text))
+# stri_enc_toutf8 - transformacion para usar tildes y ñ
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```
 
