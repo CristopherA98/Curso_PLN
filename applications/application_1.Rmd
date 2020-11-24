@@ -1,0 +1,53 @@
+---
+title: 'Tarea: Análisis morfológico y morfosintáctico'
+subtitle: "CURSO - Análisis de comportamiento en redes sociales usando Procesamiento del Lenguaje Natural"
+author: "**Cristopher Aguirre Criollo**"
+date: "`r format(Sys.time(), '%d %B, %Y')`" 
+output: 
+  html_notebook:
+    css: style.css
+    toc: true
+    number_sections: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# **Preparación**
+## **Librerias para el análisis**
+
+<table>
+<thead>
+<tr class="header">
+<th>Libreria</th> <th>Detalle</th>
+</tr>
+</thead>
+<tbody><tr class="odd">
+<td>stringi</td><td>Procesamiento de cadenas de caracteres </td>
+</tr>
+<tr class="even">
+<td>udpipe</td><td>Análisis de texto y permite el entrenamiento de modelos</td>
+</tr>
+<tr class="odd">
+<td>tidyverse</td><td>Manipulación de datos (incluye ggplot2 y dplyr)</td>
+</tr>
+<tr class="even">
+<td>igraph-ggraph</td><td>Visualización</td>
+</tr>
+</tbody>
+</table>
+
+```{r message=FALSE, warning=TRUE, comment=F}
+# Lista de librerias
+pckg <- c("udpipe","stringi","dplyr","igraph","ggraph","tidyverse")
+# install.packages(pckg) descomentar en caso que no se tenga instalado
+library(easypackages)
+libraries(pckg)
+```
+
+## Cargar el Modelo preentrenado 
