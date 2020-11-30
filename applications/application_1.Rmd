@@ -1,0 +1,131 @@
+---
+title: 'Tarea: Análisis morfológico y morfosintáctico'
+subtitle: 'CURSO - Análisis de comportamiento en redes sociales usando Procesamiento del Lenguaje Natural'
+author: '**Cristopher Aguirre Criollo**'
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_notebook:
+    css: style.css
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+---
+
+# **1. Preparación**
+## **1.1. Librerias para el análisis**
+
+```{r message=FALSE, warning=TRUE}
+# Lista de librerias
+pckg <- c("udpipe","stringi","dplyr","igraph","ggraph","tidyverse",
+          "kableExtra","extrafont")
+# install.packages(pckg) descomentar en caso que no se tenga instalado
+library(easypackages)
+libraries(pckg)
+```
+
+<table>
+<thead>
+<tr class="header">
+<th>Libreria</th> <th>Detalle</th>
+</tr>
+</thead>
+<tbody><tr class="odd">
+<td>stringi</td><td>Procesamiento de cadenas de caracteres </td>
+</tr>
+<tr class="even">
+<td>udpipe</td><td>Análisis de texto y permite el entrenamiento de modelos</td>
+</tr>
+<tr class="odd">
+<td>tidyverse</td><td>Manipulación de datos (incluye ggplot2 y dplyr)</td>
+</tr>
+<tr class="even">
+<td>igraph-ggraph</td><td>Visualización</td>
+</tr>
+</tbody>
+</table>
+
+## **1.2. Cargar el Modelo preentrenado**
+
+```{r message=FALSE, warning=TRUE}
+# Descargar el modelo preentrenado 
+# udpipe::udpipe_download_model('spanish') descomentar en caso de no tenerlo descargado
+
+# Carga de modelo pre-entrenado
+model <-  udpipe_load_model(file = "spanish-gsd-ud-2.5-191206.udpipe")
+```
+
+# **2. Análisis**
+## **2.1. Análisis morfológico**
+
+Para el análisis morfológico se usó un párrafo donde se describe el trabajo que realiza el Instituto Nacional de Estadística y Censos (INEC) mediante la Encuesta de Superficie y Producción Agropecuaria (ESPAC), con el fin de observar si el modelo preentrenado presenta algún problema al momento de clasificar las siglas en particular. 
+
+
+```{r message=FALSE, warning=TRUE,echo=T}
+# Texto para el análisis
+
+text <- "El INEC proporciona información anual sobre el sector agropecuario, a través de la aplicación de la Encuesta de Superficie y Producción Agropecuaria Continua (ESPAC), la cual obtiene datos relacionados a la cantidad de superficie plantada y cosechada, la producción y las ventas de productos agrícolas."
+
+# Analisis morfológico
+text_annotated <-  udpipe_annotate(model, x = stri_enc_toutf8(text))
+# stri_enc_toutf8 - transformacion para usar tildes y ñ
+text_annotated <-  text_annotated %>% as_tibble(encoding="latin-1")
+# selección de las variables para el análisis
+text_annotated %>% select(token, lemma, upos, feats, head_token_id) %>% kable() %>% kable_styling(font_size = 14) 
+```
+
+### **Representaciónes gráficas**
+
+A continuación, se presenta un gráfico donde se puede observar el conteo de las diferentes estructuras que se encuentran en el párrafo que se utilizo de ejemplo., los sustantivos son la estructura que se ha usado con mayor frecuencia en el escrito, con un total de 12 veces.  
+
+```{r message=FALSE, warning=TRUE,echo=T}
+text_annotated %>%
+  count(upos, sort = T) %>%
+  mutate(upos = reorder(upos, n)) %>%
+  ggplot(aes(upos, n)) +
+  geom_col(fill = "#E11010") +
+  labs(y='conteo')+
+  coord_flip()
+```
+
+## **2.2. Análisis morfosintáctico**
+
+Para el análisis morfosintáctico se a reducido el párrafo inicial en una oración sencilla, de esta forma se podrá interpretar más facilmente los resultados. 
+
+```{r message=FALSE, warning=TRUE,echo=T}
+text2 <- "El INEC se encarga de realizar encuestas en todo el Ecuador."
+# Analisis morfológico
+text_annotated2 <-  udpipe_annotate(model, x = stri_enc_toutf8(text2))
+# stri_enc_toutf8 - transformacion para usar tildes y ñ
+text_annotated2 <-  text_annotated2 %>% as_tibble(encoding="latin-1")
+# selección de las variables para el análisis
+text_annotated2 %>% select(token, lemma, upos, feats, head_token_id) %>% kable() %>% kable_styling(font_size = 14)
+```
+
+### **Representación gráfica**
+
+```{r message=FALSE, warning=TRUE,echo=T}
+plot_annotation = function(x, size = 3){
+  stopifnot(is.data.frame(x) & all(c("sentence_id", "token_id","head_token_id","dep_rel","token_id", "token", "lemma", "upos", "xpos", "feats") %in% colnames(x)))
+  x = x[!is.na(x$head_token_id), ]
+  x = x[x$sentence_id %in% min(x$sentence_id), ]
+  edges = x[x$head_token_id != 0, c("token_id", "head_token_id", "dep_rel")]
+  edges$label = edges$dep_rel
+  g = graph_from_data_frame(edges,
+                            vertices = x[, c("token_id", "token", "lemma", "upos", "xpos", "feats")],directed = TRUE)
+  gf = ggraph(g, layout = "linear") +
+    geom_edge_arc(aes(label = dep_rel, vjust = -0.20),
+                  arrow = grid::arrow(length = unit(4, 'mm'), ends = "last", type = "closed"),label_colour = "red", check_overlap = TRUE, label_size = size) +
+    geom_node_label(aes(label = token), col = "#168FD4", size = size, fontface = "bold") +
+    geom_node_text(aes(label = upos), nudge_y = -0.35, size = size) +
+    labs(title = "Resultado UDpipe", 
+         subtitle = "Tokenización, etiquetado POS y relaciones de dependencia")
+  return(gf)
+}
+
+# Gráfico
+plot_annotation(text_annotated2)
+```
+
+# **3. Conclusiones**

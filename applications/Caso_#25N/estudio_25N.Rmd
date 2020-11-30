@@ -1,0 +1,60 @@
+---
+title: "Procesamiento de Lenguaje Natural"
+subtitle: "Caso de estudio: #25N - Día Internacional de la Eliminación de Violencia contra la Mujer"
+author: Cristopher Aguirre Criollo
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  html_notebook:
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+bibliography: biblio.bib
+
+---
+
+# **1. Contexto del Análisis**
+
+## **1.1. Antecedente **
+
+Los origines del día Internacional de la Eliminación de Violencia contra la Mujer se remontan a la decada de los años ochenta, donde activistas a favor de los derechos de las mujeres mostraron su voz de protesta, en contra de la violencia de género. El Origen: honrrar la memoria de las hermanas Mirabal dos activistas de República Dominicana, quienes fueron asesinadas por el regimen de Rafael Trujillo en el año de 1960. 
+
+
+
+## **1.2. Objetivo**
+
++ Analizar el contenido de las noticias relacionadas al **Día Internacional de la Eliminación de Violencia contra la Mujer** de tres períodicos latinoamericanos, con el fin de conocer el mensaje que transmiten los medios de comunicación dentro de la lucha contra la violencia de género. 
+
+# **2. Mineo de texto**
+
+## **2.1. Prerrequisitos**
+
+```{r message=FALSE, warning=F}
+#Librerias que se van a usar para todo el análisis
+pckg <- c("easypackages","tidyverse","rvest","purrr")
+# install.packages("pckg") desomentar en caso de no tener innstalados los paquetes
+library(easypackages)
+libraries(pckg)
+```
+
+## **2.2. Obtención de los datos**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
