@@ -1,10 +1,47 @@
+---
+title: "Procesamiento de Lenguaje Natural"
+subtitle: "Caso de estudio: Violencia contra la Mujer"
+author: Cristopher Aguirre Criollo
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  html_notebook:
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+bibliography: biblio.bib
+---
+
+# **1. Contexto del Análisis**
+
+## **1.2. Objetivo**
+
++ Analizar el contenido de las noticias relacionadas a **Violencia contra la mujer** de cinco períodicos ecuatorianos, con el fin de conocer el mensaje que transmiten los medios de comunicación dentro de la lucha contra la violencia de género. 
+
+# **2. Mineo de texto**
+
+## **2.1. Prerrequisitos**
+
+Cargamos el conjunto de librería que vamos a utilizar dentro del análisis. A continuación se detalla es uso de cada una de ella:
+
+```{r message=FALSE, warning=F}
 #Librerias que se van a usar para todo el análisis
-pckg <- c("easypackages","tidyverse","rvest","purrr","tidytext","tm")
+pckg <- c("easypackages","tidyverse","rvest","purrr","kable","tidytext")
 # install.packages("pckg") desomentar en caso de no tener innstalados los paquetes
 library(easypackages)
 libraries(pckg)
+```
 
+## **2.2. Obtención de los datos**
+
+La fuente de datos que se utilizó es Google News, donde se realizó web scraping (raspado web), para extraer información de las noticias relacionadas con el objetivo de análisis.  
+
+```{r}
 # Definición de funciones
+
+## Función para el scrapeo de noticias en google news.
+
 obtieneNoticiasBusqueda <-  function(busqueda){
   news_pag = "https://news.google.com/"
   parametro_busqueda = "search?q="
@@ -21,6 +58,7 @@ obtieneNoticiasBusqueda <-  function(busqueda){
   return(noticiasDF)
 }
 
+## Función auxiliar para obtener características de la noticia.
 
 obtieneNoticiasData = function(noticia){
   news_pag = "https://news.google.com/"
@@ -38,16 +76,28 @@ obtieneNoticiasData = function(noticia){
   return(noticiaDF)
 }
 
+```
+
+**Obtener noticias sobre violencia contra a mujer en Ecuador**
+```{r}
 noticiasMujer <- obtieneNoticiasBusqueda("Violencia contra la mujer Ecuador")
+```
 
-# Diario con mas noticias publicadas del tema
-noticiasMujer %>% 
-  count(Diario) %>% 
-  slice_max(order_by = n,n=5)
+Hata la fecha de corte los diarios ecuatorianos que más noticias relacionados con **la violencia contra la mujer** publicaron fueron los que se presentan a continuación: 
 
-# Diarios
+```{r}
+noticiasMujer %>% count(Diario) %>% slice_max(order_by = n,n=5)
+```
+
+Para poder obtener la noticia completa se obtiene mediante el complemento de Google **inspector gadget** un diccionario de los CSS de cada uno de los diarios estudiados, el CSS es un lenguaje que define la apariencia de un documento. Posterior a esto, La función **obtenerNoticiaNacional** nos permitirá obtener la noticia completa que se encuentre dentro de los diccionarios CSS definidos previamente.
+
+```{r}
+
+# Diccionario CSS de los diarios
+
 Diarios <-  c("El Comercio (Ecuador)", "El Telégrafo (por eliminar)", 
             "El Universo","La Hora (Ecuador)","Primicias")
+
 Estructura = data.frame(Diario=Diarios)
 Estructura$CSS = NA
 Estructura$CSS[Estructura$Diario=='El Comercio (Ecuador)'] = '.paragraphs'
@@ -56,6 +106,8 @@ Estructura$CSS[Estructura$Diario=='El Universo'] = '.field-name-body'
 Estructura$CSS[Estructura$Diario=='La Hora (Ecuador)'] = '#contenedorGeneral'
 Estructura$CSS[Estructura$Diario=='Primicias'] = '#entry-content-inarticle'
 
+
+# Función para obtener la noticia completa. 
 
 obtenerNoticiaNacional = function(link_noticia, diario, diccionario_css){
   
@@ -72,103 +124,48 @@ obtenerNoticiaNacional = function(link_noticia, diario, diccionario_css){
   text = paste0(text, collapse = " ")
   
   return(text)
-  
 }
+```
 
+Para obtener la noticia completa se toma como input el dataframe de la busqueda realizada mediante web scraping, se filtra solo los 5 diarios que se van a tomar en cuenta dentro del análisis y se ejecuta la función que se definió para la extracción de todas las noticias. 
+
+```{r}
 noticiasMujer <-  noticiasMujer %>% filter(Diario %in% Diarios)
 news = map2_chr(noticiasMujer$Link, noticiasMujer$Diario, obtenerNoticiaNacional, diccionario_css=Estructura)
 noticiasMujer$Noticia = news
+```
 
-sapply(noticiasMujer, function(x) sum(is.na(x)))
-which(is.na(noticiasMujer$Fecha))
-noticiasMujer[57,4]
-
-noticiasMujer[57,2] <- "2020-12-01T00:00:00Z"
-glimpse(noticiasMujer)
-
-# puede que sea por la fecha de publicacion revisar mañana
-
-# fecha de corte 28 de noviembre / fecha inicio 5 marzo 
-saveRDS(noticiasMujer, "applications/Caso_estudio/noticiasMujer.RDS")
-
-# LEER DATOS
-rm(list=ls())
-noticiasMujer <-  readRDS("applications/Caso_estudio/noticiasMujer.RDS")
+```{r}
+head(noticiasMujer %>% select(Fecha, Diario, Titular, Link, Noticia))
+```
 
 
+## **2.3. Limpieza de texto y tokenización**
+
+Dentro del proceso de tokenización se a procedido a dividir un texto en las unidades que los conforman, para el caso de estudio se ha procedido a dividir por n-gramas con un **n = 2**. 
+
+```{r}
 tidy_Mujer = noticiasMujer %>% 
   unnest_tokens(output = bigrama, 
                 input = Noticia,
                 token = 'ngrams',
-                n = 2,
-                to_lower = T) 
-
-# Bigramas mas repetidos
-
-tidy_Mujer %>% 
-  count(bigrama) %>% 
-  slice_max(order_by = n,n=10)
-
-# stopwords
-library(readxl)
-stopwords_es_1 = read_excel("applications/Caso_estudio/CustomStopWords.xlsx")
-names(stopwords_es_1) = c("Token","Fuente")
-stopwords_es_2 = tibble(Token=tm::stopwords(kind = "es"), Fuente="tm")
-stopwords_es = rbind(stopwords_es_1, stopwords_es_2)
-stopwords_es = stopwords_es[!duplicated(stopwords_es$Token),]
-remove(stopwords_es_1, stopwords_es_2)
-
-bigramas_mujer = tidy_Mujer %>%
-  separate(bigrama, c("palabra1", "palabra2"), sep = " ") %>%
-  filter(!palabra1 %in% c(stopwords_es$Token)) %>%
-  filter(!palabra2 %in% c(stopwords_es$Token))
-
-bigramas_frec_mujer = bigramas_mujer %>% 
-  count(Titular, palabra1, palabra2, sort = TRUE) %>% 
-  unite(bigrama, palabra1, palabra2, sep = " ")
-
-bigramas_frec_mujer %>% select(bigrama, n) %>% head()
+                n = 2, to_lower = F)
+```
 
 
-#tf-idf
-bigramas_tfidf_mujer = bigramas_frec_mujer%>%
-  bind_tf_idf(bigrama, Titular, n)
 
-bigramas_tfidf_mujer %>% arrange(desc(tf_idf))
 
-# Red Bigramas
 
-library(igraph)
-# install.packages("influential")
-library(influential)
 
-bigrama_grafo_mujer = bigramas_mujer %>%
-  count(palabra1, palabra2, sort = TRUE) %>% 
-  filter(n >= 5) %>%
-  graph_from_data_frame()
 
-bigrama_grafo_mujer
 
-library(ggraph)
-set.seed(1998)
 
-ggraph(bigrama_grafo_mujer, layout = "fr") +
-  geom_edge_link() +
-  geom_node_point() +
-  geom_node_label(aes(label = name), vjust = 1, hjust = 0.2)
 
-a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
 
-ggraph(bigrama_grafo_mujer, layout = "fr") +
-  geom_edge_link(aes(edge_alpha = n), show.legend = FALSE,
-                 arrow = a, end_cap = circle(.07, 'inches')) +
-  geom_node_point(color = "lightblue", size = 5) +
-  geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
-  theme_void()
 
-ggraph(bigrama_grafo_mujer, layout = "fr") +
-  geom_edge_link() +
-  geom_node_point() +
-  geom_node_text(aes(label = name), vjust = 1, hjust = 1)
 
-library(tidyverse)
+
+
+
+
+
