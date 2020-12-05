@@ -14,12 +14,12 @@ library(purrr)
 library(tidyr)
 library(shinythemes)
 library(wesanderson)
-
+library(tm)
 # Autenticación en la API
-consumer_key = 'SXeFdzokFTOiwJX20vGL8SaSg'
-consumer_secret = 'FuGBS9b6AkDctJpubRUug3sK9q2jKvCTRNtASsTzbUbsSpBidl'
-access_token = '1174161623147339776-9LgvbvJmrko3vBI7qybMc0lk4AkrBW'
-access_secret = 'hp7HEU7igGorNaZseeILRHxA7TqVYecrSzpaZL0YGkK7a'
+consumer_key = 'xxxxxxxxxxxxxxxxxxxxx'
+consumer_secret = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+access_token = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+access_secret = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 
 ## authenticate via web browser
 token <- create_token(
@@ -62,7 +62,7 @@ mainPanel(
         tabPanel("CUENTAS", plotOutput("MasTwitearon"),
                  hr(),
                  plotOutput("MasMencion")),
-        tabPanel("PALABRAS", wordcloud2Output("wordPlot"))
+        tabPanel("PALABRAS", plotOutput("wordsPlot"))
     )
 )
    

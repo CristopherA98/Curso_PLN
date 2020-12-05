@@ -4,6 +4,7 @@
 #### Limpieza de texto y tokenización ####
 limpiar_tokenizar <- function(texto){
     # El orden de la limpieza no es arbitrario
+    texto <- tweets$text
     # Se convierte todo el texto a minúsculas
     nuevo_texto <- tolower(texto)
     # Eliminación de páginas web (palabras que empiezan por "http." seguidas
@@ -21,6 +22,7 @@ limpiar_tokenizar <- function(texto){
     nuevo_texto <- keep(.x = nuevo_texto, .p = function(x){str_length(x) > 1})
     return(nuevo_texto)
 }
+
 
 
 # Server  -----------------------------------------------------------------
@@ -46,7 +48,7 @@ tweets <- eventReactive(input$update,{
     
 })
 
-# Cuentas que más twittearon
+#---------------Cuentas que más twittearon
         
 output$MasTwitearon <- renderPlot({
 tweets<- data.frame(tweets())
@@ -79,7 +81,7 @@ ggplot(mastuit  [1:input$topMastuit,],
             caption = "\nSource: API twitter \nData obtenida via rtweet")
 })# fin del gráfico de mas twittearon
 
-    # Obtener los que más fueron mencionados
+#---------------Obtener los que más fueron mencionados
 
 output$MasMencion <- renderPlot({
     tweets<- data.frame(tweets())
@@ -118,39 +120,27 @@ ggplot(menciones [1:input$topMastuit,],
     
 }) # fin del gráfico de mas mencion
 
-# Wordcloud
+#---------------Wordcloud
 output$wordPlot <- renderWordcloud2({
     #Selección de variables
-    tweets<- as.data.frame(tweets())
-    tweets1 <- tweets %>% select(screen_name, created_at, status_id, text)
+    tweets<- data.frame(tweets())
+# Limpieza a cada tweet
+    tweets1 <- tweets %>% 
+        select(screen_name, created_at, status_id, text) %>% 
+        rename(autor = screen_name, 
+               fecha = created_at,
+               texto = text,
+               tweet_id = status_id)
     
-    #Se renombran las variables con nombres más prácticos
-    tweets1 <- tweets1 %>% rename(autor = screen_name, fecha = created_at,
-                                  texto = text, tweet_id = status_id)
-    
-    tweets1 <- tweets1 %>% dplyr::mutate(texto_tokenizado = map(.x = texto,
-                                                                .f = limpiar_tokenizar))
-    
-    tweets_tidy <- tweets1 %>% select(-texto) %>% unnest()
-    tweets_tidy <- tweets_tidy %>% rename(token = texto_tokenizado)
-    
+    tweets1 <- tweets1 %>% 
+        mutate(texto_tokenizado = map(.x = texto,.f = limpiar_tokenizar))%>% 
+        tweets_tidy <- tweets1 %>% select(-texto) %>% unnest() %>% 
+        rename(token = texto_tokenizado)
     ### Filtramos StopWords ###
     tweets_tidy <- tweets_tidy %>% filter(!(token %in% tm::stopwords(kind="es")))
-    
-    ### Word Clouds ### Nube de palabras ### 
-    
-    df_grouped <- tweets_tidy %>% group_by(token) %>% count(token) %>%
-        mutate(frecuencia = n / n()) %>%
-        arrange(desc(frecuencia))
-    
-    df_frame <- as.data.frame(df_grouped)
-    df_frame %>% select(token,n) %>%
-        wordcloud2(minSize = 5,shape = "circle",size = .7)
-    
-    
+
+    # Grafico palabras mas usadas
 })
-
-
 # Cerrar SERVER -----------------------------------------------------------
 
 
