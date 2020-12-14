@@ -55,7 +55,7 @@ ui <- dashboardPage(
             menuItem("Sentimientos",tabName = "sentimiento",icon = icon("heart")),
             menuItem("Cuentas",tabName = "cuentas",icon = icon("user-circle")),
             menuItem("Source code", icon = icon("file-code-o"), 
-                     href = "https://github.com/CristopherA98/Curso_PLN"),
+                     href = "https://github.com/CristopherA98/Curso_PLN/tree/main/applications/Shiny/Dashboard"),
             menuItem("Acerca de",tabName = "sobremi",icon = icon("info"))
         )
     ),
