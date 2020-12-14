@@ -1,0 +1,12 @@
+name: AnalisisTwitter
+title: AnalisisTwitter
+username:
+account: cristophera98
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3379274
+bundleId: 3985500
+url: https://cristophera98.shinyapps.io/AnalisisTwitter/
+when: 1607922409.28615
+asMultiple: FALSE
+asStatic: FALSE
