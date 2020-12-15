@@ -5,8 +5,8 @@ account: cristophera98
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3379274
-bundleId: 3985500
+bundleId: 3989445
 url: https://cristophera98.shinyapps.io/AnalisisTwitter/
-when: 1607922409.28615
+when: 1607987539.49394
 asMultiple: FALSE
 asStatic: FALSE

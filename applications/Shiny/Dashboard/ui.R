@@ -27,14 +27,14 @@ library(syuzhet)
 # Credenciales ------------------------------------------------------------
 # Cargado del token
 
-consumer_key = 'XXXXXXXXXXXXXXXXXXXXX'
-consumer_secret = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
-access_token = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXX'
-access_secret = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+consumer_key = 'xxxxxxxxxxxxxxxxxxxxxxxxxx'
+consumer_secret = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+access_token = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+access_secret = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 
-## Credenciales y creacion token
+## authenticate via web browser
 token <- create_token(
-    app = "Nombre de la app",
+    app = "Nombre_app",
     consumer_key = consumer_key,
     consumer_secret = consumer_secret,
     access_token = access_token,
@@ -53,7 +53,7 @@ ui <- dashboardPage(
             menuItem("Hashtag", tabName = "cuenta", icon = icon("twitter")),
             menuItem("Palabras", tabName = "palabra", icon = icon("th")),
             menuItem("Sentimientos",tabName = "sentimiento",icon = icon("heart")),
-            menuItem("Cuentas",tabName = "cuentas",icon = icon("user-circle")),
+            # menuItem("Cuentas",tabName = "cuentas",icon = icon("user-circle")),
             menuItem("Source code", icon = icon("file-code-o"), 
                      href = "https://github.com/CristopherA98/Curso_PLN/tree/main/applications/Shiny/Dashboard"),
             menuItem("Acerca de",tabName = "sobremi",icon = icon("info"))

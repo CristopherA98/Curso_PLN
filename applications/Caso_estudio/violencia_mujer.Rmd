@@ -139,17 +139,21 @@ noticiasMujer$Noticia = news
 head(noticiasMujer %>% select(Fecha, Diario, Titular, Link, Noticia))
 ```
 
+El dataframe que nos da como resultado recoge: la fecha en que se publicó la noticia, el diario que la publicó, el titular, el link de acceso al sitio web donde se encuentra la noticia, y la noticia como tal. 
+
 
 ## **2.3. Limpieza de texto y tokenización**
 
-Dentro del proceso de tokenización se a procedido a dividir un texto en las unidades que los conforman, para el caso de estudio se ha procedido a dividir por n-gramas con un **n = 2**. 
+Dentro del proceso de tokenización se a procedido a dividir un texto en las unidades que los conforman, para el caso de estudio se dividió en el elemento más sencillo, las palabras. Sin embargo, más adelante se busca realizar un análisis de n-gramas específicamente bigramas **(n=2)**.
+
+Al momento de realizar la tokenización, se incumple el condición tidy de nuestro dataframe, ya que nuestro objeto de análisis son las noticias que antes de la tokenización se encontraban una en cada fila del dataframe, para poder cumplir con la estructura incial, se duplica cada elemento de las demás columnas las veces que sea necesario, al proceso descrito se lo conoce como expansión, y se lo realiza con la función **unnest_tokens** del paquete **tidytext**.
 
 ```{r}
-tidy_Mujer = noticiasMujer %>% 
-  unnest_tokens(output = bigrama, 
-                input = Noticia,
-                token = 'ngrams',
-                n = 2, to_lower = F)
+tidy_Mujer <-  noticiasMujer %>% unnest_tokens(output = Token, input = Noticia)
+
+tidy_Mujer %>% 
+       select(Diario, Titular, Token) %>% 
+       head()
 ```
 
 
